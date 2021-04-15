@@ -1,39 +1,42 @@
 import React from 'react';
 
 // server utilities can be made available in the components where they are used
-import serverApi from '../../serverApi/serverApi.js'
+import serverApi from '../../utils/server.js'
 const { createUser } = serverApi
+
+import {
+	str2ab, 
+	ab2str, 
+	randomUint8, 
+	derivePasskey, 
+	hash, 
+	generateAsymKeys, 
+	generateSymKey,
+	deriveSymKey, 
+	encrypt, 
+	decrypt, 
+	importKey, 
+	importKeypair, 
+	exportKeypair,
+	generateSalt,
+	exportKey,
+	utf8ToB64,
+	b64ToUtf8
+} from '../../utils/encryption.js'
 
 const submitForm = async ({ refs }) => {
 	let { email, password } = refs
 	email = email.value
 	password = password.value 
-	const salt = String.fromCharCode.apply(
-		null,
-		crypto.getRandomValues(new Uint8Array(16))
-	)
-	console.log(salt)
-	const intermediateKey = crypto.subtle.deriveKey(
-		{
-			name: 'PBKDF2',
-			hash: 'SHA-512',
-			salt, 
-			iterations: 100
-		},
-		password,
-		{
-			name: 'AES-GCM',
-			length: 256
-		},
-		true,
-		["encrypt", "decrypt"]
-	)
-	const intermediateMaterial = await crypto.subtle.
-	exportKey('raw', intermediateKey)
-	const passKeyMaterial = intermediateMaterial.slice(0, 256)
-	const hashMaterial = intermediateMaterial.slice(256)
-	console.log(intermediateMaterial, passKeyMaterial, hashMaterial, 'all 3')
-	// createUser({email })
+	const salt = generateSalt(16)
+	console.log({salt})
+
+	// generate intermediate key and export it 
+
+	// use the first half for the authentication hash
+
+	// use the second half for the password derived key
+
 }
 
 export default function App(props) {
