@@ -2,7 +2,8 @@ CREATE TABLE `users` (
   `id` int PRIMARY KEY AUTO_INCREMENT,
   `email` varchar(255),
   `data` varchar(255),
-  `data_keys` varchar(8000)
+  `data_keys` varchar(8000),
+  `salt` varchar(255)
 );
 
 CREATE TABLE `messages` (

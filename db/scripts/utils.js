@@ -1,16 +1,13 @@
 const mysql = require('mysql')
+const creds = require('../credentials.js')
 
 const connect = () => {
 	const connection = mysql.createConnection({
-		host: 'localhost',
-		user: 'root',
-		password: '123456',
-		database: 'SecureMD',
+		...creds,
 		multipleStatements: true
 	})
 
 	connection.connect()
-
 	return connection
 }
 
