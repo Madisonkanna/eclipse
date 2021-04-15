@@ -29,13 +29,28 @@ const submitForm = async ({ refs }) => {
 	email = email.value
 	password = password.value 
 	const salt = generateSalt(16)
-	console.log({salt})
 
 	// generate intermediate key and export it 
+	const intermediateKey = await derivePasskey(password, salt, 256)
+	const intermediateMaterial = await exportKey(intermediateKey)
+	// intermediateMaterial will always have str length of 32 chararacters
 
 	// use the first half for the authentication hash
+	const hash = intermediateMaterial.slice(0, 16)
 
 	// use the second half for the password derived key
+	const passKeyMaterial = intermediateMaterial.slice(16)
+	const passKey = await importKey(passKeyMaterial, { type: 'AES-GCM', isPrivate: false })
+	const { privateKey, publicKey } = await generateAsymKeys()
+	console.log(userKeys, 'user keys')
+	// export privateKey and encrypt with passKey. Encrypt/decrypt privateKey w/ passkey.
+	const privateKeyMaterial = await exportKey(privateKey)
+	// we're encrypting privateKeyMaterial, this is our plaintxt. 
+	const encryptedPrivateKey = await encrypt(passKey, privateKeyMaterial)
+	// private user key gets decrypted/encrypted with user's passKey
+
+	// public key is stored unencrypted. Other users can encrypt data w/ this key that only this user will be able to decrypt.
+	// User key would be used to encrypt/decrypt chat keys. Chat keys used to encrypt/decrypt message data.
 
 }
 
