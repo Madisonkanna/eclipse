@@ -29,7 +29,6 @@ const submitForm = async ({ refs }) => {
 	email = email.value
 	password = password.value 
 	const salt = generateSalt(16)
-
 	// generate intermediate key and export it 
 	const intermediateKey = await derivePasskey(password, salt, 256)
 	const intermediateMaterial = await exportKey(intermediateKey)
@@ -40,17 +39,26 @@ const submitForm = async ({ refs }) => {
 
 	// use the second half for the password derived key
 	const passKeyMaterial = intermediateMaterial.slice(16)
+	console.log(passKeyMaterial, 'pass key material')
 	const passKey = await importKey(passKeyMaterial, { type: 'AES-GCM', isPrivate: false })
 	const { privateKey, publicKey } = await generateAsymKeys()
-	console.log(userKeys, 'user keys')
+	console.log('priv key, pub key', privateKey, publicKey)
+
 	// export privateKey and encrypt with passKey. Encrypt/decrypt privateKey w/ passkey.
-	const privateKeyMaterial = await exportKey(privateKey)
+	// pkcs8 = encryption type for private keys. can't export private keys as raw. 
+	const privateKeyMaterial = await exportKey(privateKey, 'pkcs8')
+	const publicKeyMaterial = await exportKey(publicKey)
+
 	// we're encrypting privateKeyMaterial, this is our plaintxt. 
 	const encryptedPrivateKey = await encrypt(passKey, privateKeyMaterial)
 	// private user key gets decrypted/encrypted with user's passKey
 
 	// public key is stored unencrypted. Other users can encrypt data w/ this key that only this user will be able to decrypt.
 	// User key would be used to encrypt/decrypt chat keys. Chat keys used to encrypt/decrypt message data.
+	const data = await encrypt(passKey, JSON.stringify({}))
+	const createUserRes = await createUser({
+		email, data, publicKey: utf8ToB64(publicKeyMaterial), privateKey: encryptedPrivateKey, salt
+	})
 
 }
 

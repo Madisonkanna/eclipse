@@ -8,8 +8,17 @@ const host = 'http://localhost:3000'
 // const authUser = async (email, password) => await fetch('POST', `${host}/auth-user`, [JSON.stringify({ email, password })])
 
 
-const createUser = async({ email, data, publicKey, privateKey }) => {
-	const res = await fetch('localhost:3000/createUser')
+const createUser = ({ email, data, publicKey, privateKey, salt }) => {
+	return fetch('http://localhost:3000/create-user', {
+		method: 'POST',
+		body: JSON.stringify({
+			email, data, publicKey, privateKey, salt
+		}),
+		headers: {
+			'Content-Type': 'application/json',
+			'Access-Control-Allow-Origin': '*'
+    	},
+	})
 	console.log('res:', res)
 }
 
