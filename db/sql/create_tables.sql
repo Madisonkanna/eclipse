@@ -1,10 +1,11 @@
 CREATE TABLE `users` (
   `id` int PRIMARY KEY AUTO_INCREMENT,
-  `email` varchar(255),
+  `email` varchar(255) NOT NULL,
   `data` varchar(255),
-  `public_key` text,
-  `private_key` text,
-  `salt` varchar(255)
+  `public_key` text NOT NULL,
+  `private_key` text NOT NULL,
+  `salt` varchar(255) NOT NULL, 
+  `hash` varchar(255) NOT NULL
 );
 
 CREATE TABLE `messages` (
