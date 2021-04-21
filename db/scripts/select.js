@@ -1,6 +1,6 @@
 const { query } = require('./utils.js')
 
-const select = async (table, conditions) => {
+const select = async (table, conditions = {}) => {
 	let error
 	if(!table || typeof table !== 'string') {
 		error = 'Table name required passed in as a string on the first argument'
