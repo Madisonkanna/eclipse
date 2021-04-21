@@ -1,3 +1,3 @@
 # eclipse
 
-A private messenge.
+A private messenger.
