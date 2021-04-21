@@ -174,6 +174,23 @@ const exportKeypair = async (keypair) => ({
 	private: await exportKey(keypair.privateKey || keypair.private, 'pkcs8')
 })
 
+// get hash and keys from salt, email and pass
+const derivePassKeyHash = async ({ salt, password }) => {
+	// generate intermediate key and export it 
+	const intermediateKey = await derivePasskey(password, salt, 256)
+	const intermediateMaterial = await exportKey(intermediateKey)
+	// intermediateMaterial will always have str length of 32 chararacters
+
+	// use the first half for the authentication hash
+	const hash = utf8ToB64(intermediateMaterial.slice(0, 16))
+
+	// use the second half for the password derived key
+	const passKeyMaterial = intermediateMaterial.slice(16)
+	console.log(passKeyMaterial, 'pass key material')
+	const key = await importKey(passKeyMaterial, { type: 'AES-GCM', isPrivate: false })
+	return { key, hash }
+}
+
 export {
 	str2ab, 
 	ab2str, 
@@ -189,6 +206,7 @@ export {
 	importKeypair, 
 	exportKeypair,
 	generateSalt,
+	derivePassKeyHash,
 	exportKey,
 	utf8ToB64,
 	b64ToUtf8
