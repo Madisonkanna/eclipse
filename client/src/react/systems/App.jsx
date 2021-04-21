@@ -1,92 +1,93 @@
-import React from 'react';
+import React, { useReducer } from 'react';
 
 // server utilities can be made available in the components where they are used
 import serverApi from '../../utils/server.js'
 const { createUser } = serverApi
+import Header from './Header.jsx'
+import Login from './Login.jsx'
+import AccountCreation from './AccountCreation.jsx'
+import Messenger from './Messenger.jsx'
+import reactUtils from  '../../utils/react.js'
+const { createReducer } = reactUtils
 
-import {
-	str2ab, 
-	ab2str, 
-	randomUint8, 
-	derivePasskey, 
-	hash, 
-	generateAsymKeys, 
-	generateSymKey,
-	deriveSymKey, 
-	encrypt, 
-	decrypt, 
-	importKey, 
-	importKeypair, 
-	exportKeypair,
-	generateSalt,
-	exportKey,
-	utf8ToB64,
-	b64ToUtf8
-} from '../../utils/encryption.js'
-
-const submitForm = async ({ refs }) => {
-	let { email, password } = refs
-	email = email.value
-	password = password.value 
-	const salt = generateSalt(16)
-	// generate intermediate key and export it 
-	const intermediateKey = await derivePasskey(password, salt, 256)
-	const intermediateMaterial = await exportKey(intermediateKey)
-	// intermediateMaterial will always have str length of 32 chararacters
-
-	// use the first half for the authentication hash
-	const hash = intermediateMaterial.slice(0, 16)
-
-	// use the second half for the password derived key
-	const passKeyMaterial = intermediateMaterial.slice(16)
-	console.log(passKeyMaterial, 'pass key material')
-	const passKey = await importKey(passKeyMaterial, { type: 'AES-GCM', isPrivate: false })
-	const { privateKey, publicKey } = await generateAsymKeys()
-	console.log('priv key, pub key', privateKey, publicKey)
-
-	// export privateKey and encrypt with passKey. Encrypt/decrypt privateKey w/ passkey.
-	// pkcs8 = encryption type for private keys. can't export private keys as raw. 
-	const privateKeyMaterial = await exportKey(privateKey, 'pkcs8')
-	const publicKeyMaterial = await exportKey(publicKey)
-
-	// we're encrypting privateKeyMaterial, this is our plaintxt. 
-	const encryptedPrivateKey = await encrypt(passKey, privateKeyMaterial)
-	// private user key gets decrypted/encrypted with user's passKey
-
-	// public key is stored unencrypted. Other users can encrypt data w/ this key that only this user will be able to decrypt.
-	// User key would be used to encrypt/decrypt chat keys. Chat keys used to encrypt/decrypt message data.
-	const data = await encrypt(passKey, JSON.stringify({}))
-	const createUserRes = await createUser({
-		email, data, publicKey: utf8ToB64(publicKeyMaterial), privateKey: encryptedPrivateKey, salt
-	})
-
+const initState = {
+	// Views: login, account creation
+	view: 'login',
+	authenticated: false,
+	acccount_creation: {},
+	login: {
+		errors: {
+			email: null,
+			password: null,
+			form: null
+		}
+	}
 }
 
-export default function App(props) {
+const navActions = {
+	STEP_TO_MESSENGER: (state, action) => {
+		state.view = 'messenger'
+		return state
+	},
+	STEP_TO_ACCOUNT_CREATION: (state, action) => {
+		state.view = 'account_creation'
+		return state
+	},
+	STEP_TO_LOGIN: (state, action) => {
+		state.view = 'login'
+		return state
+	}
+}
+const loginActions = {
+	SET_EMAIL_ERROR: (state, action) => {
+		state.login.errors.email = action.error
+		return state
+	},
+	SET_PASSWORD_ERROR: (state, action) => {
+		state.login.errors.password = action.error
+		return state
+	},
+	SET_FORM_ERROR: (state, action) => {
+		state.login.errors.form = action.error
+		return state
+	},
+	USER_AUTHENTICTED: (state, action) => {
+		state.authenticated = true
+		return state
+	}
+}
+const actions = {
+	...loginActions,
+	...navActions
+}
+
+const dataActions = {
+	SET_USER_DATA: (state, action) => {
+		state.users = action.users 
+		return state
+	}
+}
+
+const appReducer = createReducer(actions)
+const dataReducer = createReducer(dataActions)
+
+export default function App() {
+	const [props, dispatch] = useReducer(appReducer, initState)
+	const [data, setData] = useReducer(dataReducer, { users: [] })
+	const viewProps = {
+		props,
+		dispatch,
+		data,
+		setData
+	}
 	const refs = {}
 	return (
 		<div className="App">
-			<form onSubmit={e => {
-				e.preventDefault()
-				submitForm({refs})}
-				}>
-				<label >Email:</label>
-				<input 
-					placeholder="email"
-					ref={r => {
-						refs.email = r
-					}}
-				/>
-				<label>Password:</label>
-				<input 
-					placeholder="password"
-					ref={r => {
-						refs.password = r
-					}}
-				/>
-				<button  type="submit" >Label</button>
-			</form>
-
+			<Header {...viewProps } />
+			{props.view === 'login' ? <Login {...viewProps } />
+			: props.view === 'account_creation' ? <AccountCreation {...viewProps} />
+			: props.view === 'messenger' ? <Messenger {...viewProps} />
+			: null}
 		</div>
 	)
 }
