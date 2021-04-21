@@ -1,0 +1,71 @@
+html, body {
+    padding: 0;
+    margin: 0;
+}
+
+h2 {
+    padding: 0;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+.App > * {
+    padding: 8px;
+}
+
+.Login, .AccountCreation {
+    display: flex;
+    flex-direction: column;
+    padding: 8px;
+    margin-top: 8px;
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%);
+}
+
+.Login form, .AccountCreation form {
+    border: 1px solid darkgrey;
+    align-self: center;
+    border-radius: 3px;
+    padding: 8px;
+    width: fit-content;
+}
+
+.Login .formError, .AccountCreation .formError {
+    border-color: darkred;
+}
+
+.Login > *+*, 
+.Login form > *+*,
+.AccountCreation > *+*,
+.AccountCreation form > *+* {
+    margin-top: 8px;
+}
+
+.error {
+    color: darkred;
+}
+
+.Input > * {
+    display: block;
+}
+
+.flex {
+    display: flex;
+}
+
+.justifyBetween {
+    justify-content: space-between;
+}
+
+.interactive {
+    cursor: pointer;
+}
+
+.Header {
+    height: 32px;
+    background-color: rebeccapurple;
+    color: white;
+}
