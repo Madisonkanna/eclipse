@@ -37,6 +37,24 @@ h2 {
     border-color: darkred;
 }
 
+.Messenger {
+    display: flex;
+}
+
+.FriendsList {
+    min-width: 150px;
+    border-right: 2px solid grey;
+    border-bottom: 2px solid grey;
+}
+
+.FriendsList .Friend {
+    padding: 3px;
+}
+
+.Chat {
+    width: 100%;
+}
+
 .Login > *+*, 
 .Login form > *+*,
 .AccountCreation > *+*,
@@ -48,8 +66,25 @@ h2 {
     color: darkred;
 }
 
+.Input input {
+    width: 100%;
+}
+
 .Input > * {
     display: block;
+}
+
+.Modal {
+    display: none;
+}
+
+.Modal.visible {
+    display: block;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    border: 2px grey solid;
 }
 
 .flex {

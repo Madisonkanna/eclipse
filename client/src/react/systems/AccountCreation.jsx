@@ -3,7 +3,7 @@ import React from 'react';
 // server utilities can be made available in the components where they are used
 import serverApi from '../../utils/server.js'
 import Input from '../components/Input.jsx'
-const { createUser } = serverApi
+const { createUser, authenticate } = serverApi
 
 import {
 	str2ab, 
@@ -26,7 +26,7 @@ import {
 	b64ToUtf8
 } from '../../utils/encryption.js'
 
-const submitForm = async ({ refs }) => {
+const submitForm = async ({ refs, dispatch, setData }) => {
 	let { email, password } = refs
 	email = email.value
 	password = password.value 
@@ -51,20 +51,39 @@ const submitForm = async ({ refs }) => {
 	})
 	console.log(createUserRes, 'createUserRes body') 
 	const createUserResBody = await createUserRes.json()
+	console.log(createUserResBody, 'createUserResBody...')
 	if (createUserResBody.success) {
 		// we have account created and we can log in!
+		const authRes = await authenticate({ password, email })
+		if (authRes.success) {
+			dispatch({
+				type: 'STEP_TO_MESSENGER'
+			})
+			setData({
+				type: 'SET_USER_DATA',
+				users: authRes.data
+			})
+			
+		} else {
+			dispatch({
+				type: 'SET_FORM_ERROR',
+				error: 'Invald password/email combination.'
+			})
+		}
+
+	} else if (createUserResBody.code === "ER_DUP_ENTRY") {
+		alert('Username already taken')
 	} else {
-		// no :(
-		alert('Account creation failed!')
+		alert('Account creation failed.')
 	}
 }
-export default function AccountCreation({ props, dispatch }) {
+export default function AccountCreation({ props, dispatch, setData }) {
 	const refs = {}
 	return (
 		<div className="AccountCreation">
 			<form onSubmit={e => {
 				e.preventDefault()
-				submitForm({refs})}
+				submitForm({refs, dispatch, setData})}
 				}>
 				<h2>Create Account</h2>
 				<Input 

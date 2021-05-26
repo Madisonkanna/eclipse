@@ -1,6 +1,6 @@
 CREATE TABLE `users` (
   `id` int PRIMARY KEY AUTO_INCREMENT,
-  `email` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL UNIQUE,
   `data` varchar(255),
   `public_key` text NOT NULL,
   `private_key` text NOT NULL,

@@ -15,13 +15,17 @@ const secretKey = crypto.createHash('sha256').update(keyMaterial).digest('hex')
 
 server.use(cors())
 server.use(bodyParser.json())
-const whiteListedPaths = ['/pre-login', '/login']
+const whiteListedPaths = ['/pre-login', '/login', '/create-user']
 server.use((req, res, next) => {
     if (whiteListedPaths.includes(req.path)) {
         next()
         return
     }
     const token = req.headers.authorization
+    if (!token) {
+        res.send(404)
+        return
+    }
     console.log(token, 'token')
     const valid = jwt.verify(token, secretKey)
     if (!valid) {

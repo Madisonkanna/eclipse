@@ -7,6 +7,7 @@ import Header from './Header.jsx'
 import Login from './Login.jsx'
 import AccountCreation from './AccountCreation.jsx'
 import Messenger from './Messenger.jsx'
+import StartChatModal from './StartChatModal.jsx'
 import reactUtils from  '../../utils/react.js'
 const { createReducer } = reactUtils
 
@@ -15,6 +16,12 @@ const initState = {
 	view: 'login',
 	authenticated: false,
 	acccount_creation: {},
+	messenger: {
+		search: '',
+		addSearch: '',
+		selected: null,
+		startChatModal: false,
+	},
 	login: {
 		errors: {
 			email: null,
@@ -56,9 +63,32 @@ const loginActions = {
 		return state
 	}
 }
+const messengerActions = {
+	UPDATE_FRIENDS_SEARCH: (state, action) => {
+		state.messenger.search = action.search
+		return state
+	},
+	UPDATE_ADD_SEARCH: (state, action) => {
+		state.messenger.addSearch = action.addSearch
+		return state
+	},
+	SELECT_FRIEND_CHAT: (state, action) => {
+		state.messenger.selected = action.selected
+		return state
+	},
+	PROMPT_NEW_CHAT_MODAL: (state, action) => {
+		state.messenger.startChatModal = true
+		return state
+	},
+	DISMISS_NEW_CHAT_MODAL: (state, action) => {
+		state.messenger.startChatModal = false
+		return state
+	}
+}
 const actions = {
 	...loginActions,
-	...navActions
+	...navActions,
+	...messengerActions
 }
 
 const dataActions = {
@@ -81,6 +111,7 @@ export default function App() {
 		setData
 	}
 	const refs = {}
+	console.log(props, 'props here..')
 	return (
 		<div className="App">
 			<Header {...viewProps } />
@@ -88,6 +119,7 @@ export default function App() {
 			: props.view === 'account_creation' ? <AccountCreation {...viewProps} />
 			: props.view === 'messenger' ? <Messenger {...viewProps} />
 			: null}
+			<StartChatModal {...viewProps} /> 
 		</div>
 	)
 }
