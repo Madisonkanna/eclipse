@@ -28,26 +28,30 @@ import {
 
 const submitForm = async ({ refs, dispatch, setData }) => {
 	let { email, password } = refs
-	email = email.value
+	email = email.value 
 	password = password.value 
 	const salt = generateSalt(16)
+	const dataKey = await generateSymKey()
 	const { key, hash } = await derivePassKeyHash({ salt, password })
 	const { privateKey, publicKey } = await generateAsymKeys()
+
 	console.log('priv key, pub key', privateKey, publicKey)
-	// export privateKey and encrypt with passKey. Encrypt/decrypt privateKey w/ passkey.
+	// export privateKey and encrypt with passKey. Encrypt/decrypt privateKey w/ data key.
 	// pkcs8 = encryption type for private keys. can't export private keys as raw. 
 	const privateKeyMaterial = await exportKey(privateKey, 'pkcs8')
 	const publicKeyMaterial = await exportKey(publicKey)
 
 	// we're encrypting privateKeyMaterial, this is our plaintxt. 
-	const encryptedPrivateKey = await encrypt(key, privateKeyMaterial)
-	// private user key gets decrypted/encrypted with user's passKey
-
+	const encryptedPrivateKey = await encrypt(dataKey, privateKeyMaterial)
+	// old: private user key gets decrypted/encrypted with user's passKey
+	// UPDATE: private key gets decrypted/encrypted with the user's data key 
+	const exportedDataKey = await exportKey(dataKey)
+	const encryptedDataKey = await encrypt(key, exportedDataKey)
 	// public key is stored unencrypted. Other users can encrypt data w/ this key that only this user will be able to decrypt.
 	// User key would be used to encrypt/decrypt chat keys. Chat keys used to encrypt/decrypt message data.
-	const data = await encrypt(key, JSON.stringify({}))
+	const data = await encrypt(dataKey, JSON.stringify({}))
 	const createUserRes = await createUser({
-		email, data, publicKey: utf8ToB64(publicKeyMaterial), privateKey: encryptedPrivateKey, salt, hash
+		email, data, publicKey: utf8ToB64(publicKeyMaterial), privateKey: encryptedPrivateKey, salt, hash, dataKey: encryptedDataKey
 	})
 	console.log(createUserRes, 'createUserRes body') 
 	const createUserResBody = await createUserRes.json()
@@ -56,12 +60,13 @@ const submitForm = async ({ refs, dispatch, setData }) => {
 		// we have account created and we can log in!
 		const authRes = await authenticate({ password, email })
 		if (authRes.success) {
+			console.log(authRes, 'authRes...')
 			dispatch({
 				type: 'STEP_TO_MESSENGER'
 			})
 			setData({
 				type: 'SET_USER_DATA',
-				users: authRes.data
+				users: authRes.users
 			})
 			
 		} else {

@@ -5,7 +5,8 @@ CREATE TABLE `users` (
   `public_key` text NOT NULL,
   `private_key` text NOT NULL,
   `salt` varchar(255) NOT NULL, 
-  `hash` varchar(255) NOT NULL
+  `hash` varchar(255) NOT NULL,
+  `data_key` text NOT NULL
 );
 
 CREATE TABLE `messages` (

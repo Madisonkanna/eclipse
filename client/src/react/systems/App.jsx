@@ -60,6 +60,7 @@ const loginActions = {
 	},
 	USER_AUTHENTICTED: (state, action) => {
 		state.authenticated = true
+		state.user = action.user
 		return state
 	}
 }

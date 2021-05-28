@@ -11,6 +11,8 @@ let authToken = undefined
 
 import {
 	derivePassKeyHash,
+	importKey,
+	decrypt
 } from './encryption.js'
 
 const _fetch = (route, body = {}) => {
@@ -42,25 +44,37 @@ const authenticate = async ({ email, password }) => {
 	const { key, hash } = await derivePassKeyHash({ password, salt })
 	const getLoginResponse = await _fetch('login', { email, hash })
 	const loginRes = await getLoginResponse.json()
-	console.log('loginRes:', loginRes)
 	authToken = loginRes.token
 	if (loginRes.success) {
+		
 		const getUsersData = await getUsers()
 		const usersData = await getUsersData.json()
-		console.log(usersData, 'usersdData')
-		return usersData
+		const decryptedDataKey = await decrypt(key, loginRes.user.data_key)
 
+		return {
+			success: usersData.success,
+			users: usersData.data,
+			user: {
+				...loginRes.user, 
+				data_key: await importKey(decryptedDataKey,  { type: 'AES-GCM' })
+			}
+		}
 	}
 	return loginRes
 }
 // Body: { email, data, publicKey, privateKey, salt }
 const createUser = body => _fetch('create-user', body)
 
+const startChat = body => _fetch('start-chat', body)
+
+const createChatUser = body => _fetch('create-chat-user', body)
+
 const serverApi = {
 	// export fetch utilities here
 	// authUser
 	createUser,
 	authenticate,
+	startChat,
 	getUsers
 }
 

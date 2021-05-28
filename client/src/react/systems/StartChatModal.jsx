@@ -1,7 +1,10 @@
 import React from 'react'
 import Modal from '../components/Modal'
+import serverApi from '../../utils/server.js'
 import Input from '../components/Input'
-import { generateSymKey, exportKey } from '../../utils/encryption.js'
+import { generateSymKey, exportKey, encrypt } from '../../utils/encryption.js'
+
+const { createChatUser, startChat } = serverApi
 
 const StartChatModal = ({dispatch, props, setData, data}) => {
 
@@ -25,12 +28,17 @@ const StartChatModal = ({dispatch, props, setData, data}) => {
                             <div>
                                 <span>{user.email}</span>
                                 <span
-                                    onClick={e => {
-                                        // generate symmetric key 
-                                        const getChatKey = await generateSymKey
-                                        const chatKey = await exportKey(key)
-                                        console.log(chatKey, 'chat key.. ')
-                                        // encrypt ccat key with user's data key 
+                                    onClick={async e => {
+                                        const chatKey = await generateSymKey()
+                                        const exportedChatKey = await exportKey(chatKey)
+                                        const encryptedChatKey = await encrypt(props.user.data_key, exportedChatKey)
+                                        const startChatRes = await startChat({
+                                            name: 'Chat 1',
+                                            users: [user],
+                                            chatKey: encryptedChatKey
+                                        })
+                    
+                                       console.log(startChatRes, 'start chat res')
 
                                     }}
                                     >&oplus;</span>

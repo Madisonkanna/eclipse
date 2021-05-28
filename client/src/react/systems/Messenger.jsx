@@ -18,6 +18,7 @@ const Chat = ({data, props, dispatch}) => {
 }
 
 const FriendsList = ({data, setData, props, dispatch}) => {
+    console.log('data...', data)
     return (
         <div className="FriendsList">
             <h2>Chats</h2>
@@ -27,6 +28,7 @@ const FriendsList = ({data, setData, props, dispatch}) => {
                     dispatch({
                         type: 'PROMPT_NEW_CHAT_MODAL'
                     })
+                    
                 }}
                 >&oplus;</div>
             <Input 

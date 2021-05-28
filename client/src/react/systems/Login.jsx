@@ -30,12 +30,20 @@ const submitForm = async ({ data, setData, props, dispatch, refs }) => {
 	const email = refs.email.value 
 	const authRes = await authenticate({ password, email })
 	if (authRes.success) {
+		console.log(authRes, 'auth res..')
 		dispatch({
 			type: 'STEP_TO_MESSENGER'
 		})
+
+
 		setData({
 			type: 'SET_USER_DATA',
-			users: authRes.data
+			users: authRes.users
+		})
+
+		dispatch({
+			type: 'USER_AUTHENTICTED',
+			user: authRes.user
 		})
 		
 	} else {

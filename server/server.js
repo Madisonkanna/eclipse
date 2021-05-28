@@ -56,14 +56,40 @@ server.post('/login', async (req, res) => {
     const hashesMatch = response[0].hash === hash
     const tokenPayload = { id: response[0].id }
     const token = jwt.sign(tokenPayload, secretKey)
-    res.send({
-        success: hashesMatch, token
-    })
+    const responsePayload = { token, success: hashesMatch }
+    if (hashesMatch) {
+        responsePayload.user = response[0]
+    }
+    res.send(responsePayload)
 })
 
 server.post('/create-user', async (req, res) => {
-    const { email, data, publicKey, privateKey, salt, hash } = req.body
-    const [success, response] = await insert('users', { email, data, public_key: publicKey, private_key: privateKey, salt, hash })
+    const { email, data, publicKey, privateKey, salt, hash, dataKey } = req.body
+    const [success, response] = await insert('users', { email, data, public_key: publicKey, private_key: privateKey, salt, hash, data_key: dataKey })
+    res.send({...response, success})
+})
+
+server.post('/start-chat', async (req, res) => {
+    const { name, users, chatKey } = req.body 
+    const [success, response] = await insert('chats', { name })
+
+    if (users.length) {
+        users.map(user => insert('chat_users', {
+            user_id: user.id, 
+            chat_id: response.insertId,
+            chat_key: chatKey
+        }))
+    }
+    res.send({
+        ...response, success
+    })
+})
+
+server.post('/add-chat-user', async (req, res) => {
+    const { id, userId, chatId, chatKey } = req.body
+    const [success, response] = await insert('chat_users', {
+        id, user_id, chat_id, chat_key
+    })
     res.send({...response, success})
 })
 
