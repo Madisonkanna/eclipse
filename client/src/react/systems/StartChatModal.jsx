@@ -38,7 +38,6 @@ const StartChatModal = ({dispatch, props, setData, data}) => {
                                             chatKey: encryptedChatKey
                                         })
                     
-                                       console.log(startChatRes, 'start chat res')
 
                                     }}
                                     >&oplus;</span>
