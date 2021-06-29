@@ -2,7 +2,7 @@
 
 A private messenger app with e2e encryption.
 
-# Foobar
+# Description
 
 A private messenger app with end to end encryption.
 
