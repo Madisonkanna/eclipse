@@ -1,10 +1,6 @@
 # eclipse
 
-A private messenger app with e2e encryption.
-
-# Description
-
-A private messenger app with end to end encryption.
+A private messenger app with e2e encryption. WIP.
 
 ## Installation
 
